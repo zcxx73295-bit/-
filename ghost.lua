@@ -1,7 +1,6 @@
 -- НАЗВАНИЕ СКРИПТА: HITBOX + AIMBOT + SPINBOT + KILLAURA + PUSH PRO
--- ТОЛЬКО ДЛЯ ТЕЛЕФОНА
--- МЕНЮ ВВЕРХУ ПО ЦЕНТРУ С АНИМАЦИЕЙ
--- ЧЁРНАЯ ИКОНКА
+-- ДЛЯ ТЕЛЕФОНА
+-- МЕНЮ С РАЗДЕЛАМИ, ВСЕ ФУНКЦИИ НА МЕСТЕ
 
 local player = game.Players.LocalPlayer
 local runService = game:GetService("RunService")
@@ -51,7 +50,7 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- ===== ЧЁРНАЯ ИКОНКА (без картинки) =====
+-- ===== ЧЁРНАЯ ИКОНКА =====
 local iconButton = Instance.new("ImageButton")
 iconButton.Parent = screenGui
 iconButton.Size = UDim2.new(0, 55, 0, 55)
@@ -61,13 +60,11 @@ iconButton.BackgroundTransparency = 0.1
 iconButton.BorderSizePixel = 2
 iconButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
 iconButton.Image = ""
-iconButton.ImageTransparency = 1
 
 local iconCorner = Instance.new("UICorner")
 iconCorner.CornerRadius = UDim.new(1, 0)
 iconCorner.Parent = iconButton
 
--- Буква H на иконке
 local letter = Instance.new("TextLabel")
 letter.Parent = iconButton
 letter.Size = UDim2.new(1, 0, 1, 0)
@@ -77,7 +74,6 @@ letter.TextColor3 = Color3.fromRGB(255, 255, 255)
 letter.TextScaled = true
 letter.Font = Enum.Font.GothamBold
 
--- РАДУЖНАЯ ОБВОДКА
 local glowBorder = Instance.new("UIStroke")
 glowBorder.Parent = iconButton
 glowBorder.Thickness = 3
@@ -86,12 +82,7 @@ glowBorder.Color = Color3.fromRGB(255, 0, 0)
 glowBorder.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 spawn(function()
-    local colors = {
-        Color3.fromRGB(255, 0, 0), Color3.fromRGB(255, 165, 0),
-        Color3.fromRGB(255, 255, 0), Color3.fromRGB(0, 255, 0),
-        Color3.fromRGB(0, 0, 255), Color3.fromRGB(75, 0, 130),
-        Color3.fromRGB(238, 130, 238)
-    }
+    local colors = {Color3.fromRGB(255,0,0), Color3.fromRGB(255,165,0), Color3.fromRGB(255,255,0), Color3.fromRGB(0,255,0), Color3.fromRGB(0,0,255), Color3.fromRGB(75,0,130), Color3.fromRGB(238,130,238)}
     local i = 1
     while iconButton and iconButton.Parent do
         glowBorder.Color = colors[i]
@@ -101,7 +92,6 @@ spawn(function()
     end
 end)
 
--- СТАТУС
 local statusIndicator = Instance.new("Frame")
 statusIndicator.Parent = iconButton
 statusIndicator.Size = UDim2.new(0, 10, 0, 10)
@@ -144,11 +134,11 @@ userInputService.TouchMoved:Connect(function(input)
     end
 end)
 
--- ===== МЕНЮ ВВЕРХУ ПО ЦЕНТРУ =====
+-- ===== МЕНЮ С РАЗДЕЛАМИ =====
 local mainFrame = Instance.new("Frame")
 mainFrame.Parent = screenGui
-mainFrame.Size = UDim2.new(0, math.min(480, camera.ViewportSize.X - 20), 0, 280)
-mainFrame.Position = UDim2.new(0.5, -mainFrame.Size.X.Offset / 2, 0.05, 0)
+mainFrame.Size = UDim2.new(0, math.min(500, camera.ViewportSize.X - 20), 0, 380)
+mainFrame.Position = UDim2.new(0.5, -mainFrame.Size.X.Offset / 2, 0.03, 0)
 mainFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 35)
 mainFrame.BackgroundTransparency = 0.08
 mainFrame.BorderSizePixel = 2
@@ -160,7 +150,6 @@ local mainCorner = Instance.new("UICorner")
 mainCorner.CornerRadius = UDim.new(0, 16)
 mainCorner.Parent = mainFrame
 
--- ТЕНЬ
 local shadow = Instance.new("Frame")
 shadow.Parent = mainFrame
 shadow.Size = UDim2.new(1, 0, 1, 0)
@@ -243,19 +232,16 @@ userInputService.TouchMoved:Connect(function(input)
     end
 end)
 
--- ===== АНИМАЦИЯ ОТКРЫТИЯ =====
+-- АНИМАЦИЯ
 local function openMenu()
     mainFrame.Visible = true
     mainFrame.Size = UDim2.new(0, 0, 0, 0)
-    mainFrame.Position = UDim2.new(0.5, 0, 0.05, 0)
+    mainFrame.Position = UDim2.new(0.5, 0, 0.03, 0)
     mainFrame.BackgroundTransparency = 1
-    
-    local targetSize = UDim2.new(0, math.min(480, camera.ViewportSize.X - 20), 0, 280)
-    local targetPos = UDim2.new(0.5, -targetSize.X.Offset / 2, 0.05, 0)
-    
+    local targetSize = UDim2.new(0, math.min(500, camera.ViewportSize.X - 20), 0, 380)
     tweenService:Create(mainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
         Size = targetSize,
-        Position = targetPos,
+        Position = UDim2.new(0.5, -targetSize.X.Offset / 2, 0.03, 0),
         BackgroundTransparency = 0.08
     }):Play()
 end
@@ -269,33 +255,45 @@ local function closeMenu()
     mainFrame.Visible = false
 end
 
--- ===== КЛИК ПО ИКОНКЕ =====
 iconButton.MouseButton1Click:Connect(function()
-    if mainFrame.Visible then
-        closeMenu()
-    else
-        openMenu()
-    end
+    if mainFrame.Visible then closeMenu() else openMenu() end
 end)
 
--- ===== КОНТЕНТ МЕНЮ =====
-local contentFrame = Instance.new("Frame")
-contentFrame.Parent = mainFrame
-contentFrame.Size = UDim2.new(1, -10, 1, -45)
-contentFrame.Position = UDim2.new(0, 5, 0, 40)
-contentFrame.BackgroundTransparency = 1
+-- ===== КОНТЕНТ С РАЗДЕЛАМИ =====
+local scrollFrame = Instance.new("ScrollingFrame")
+scrollFrame.Parent = mainFrame
+scrollFrame.Size = UDim2.new(1, -10, 1, -45)
+scrollFrame.Position = UDim2.new(0, 5, 0, 40)
+scrollFrame.BackgroundTransparency = 1
+scrollFrame.ScrollBarThickness = 3
+scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(150, 150, 150)
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 750)
 
--- РЯД 1: ТОГГЛЫ
-local row1 = Instance.new("Frame")
-row1.Parent = contentFrame
-row1.Size = UDim2.new(1, 0, 0, 70)
-row1.BackgroundTransparency = 1
-
-local function createSmallToggle(text, xPos, callback)
+local function createSection(titleText, yPos)
     local frame = Instance.new("Frame")
-    frame.Parent = row1
-    frame.Size = UDim2.new(0, 80, 0, 32)
-    frame.Position = UDim2.new(0, xPos, 0, 0)
+    frame.Parent = scrollFrame
+    frame.Size = UDim2.new(1, 0, 0, 130)
+    frame.Position = UDim2.new(0, 0, 0, yPos)
+    frame.BackgroundTransparency = 1
+    
+    local label = Instance.new("TextLabel")
+    label.Parent = frame
+    label.Size = UDim2.new(1, 0, 0, 20)
+    label.BackgroundTransparency = 1
+    label.Text = titleText
+    label.TextColor3 = Color3.fromRGB(255, 200, 200)
+    label.TextSize = 14
+    label.Font = Enum.Font.GothamBold
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    
+    return frame, label
+end
+
+local function createToggleInSection(parent, text, xPos, yPos, callback)
+    local frame = Instance.new("Frame")
+    frame.Parent = parent
+    frame.Size = UDim2.new(0, 90, 0, 30)
+    frame.Position = UDim2.new(0, xPos, 0, yPos)
     frame.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
     frame.BackgroundTransparency = 0.15
     local fCorner = Instance.new("UICorner")
@@ -338,51 +336,11 @@ local function createSmallToggle(text, xPos, callback)
     return frame
 end
 
-local tx = 2
-createSmallToggle("HITBOX", tx, function(s) hitboxEnabled = s end)
-tx = tx + 85
-createSmallToggle("AIMBOT", tx, function(s) aimbotEnabled = s end)
-tx = tx + 85
-createSmallToggle("SPINBOT", tx, function(s) spinbotEnabled = s end)
-tx = tx + 85
-createSmallToggle("ESP", tx, function(s) espEnabled = s end)
-tx = tx + 85
-createSmallToggle("PUSH", tx, function(s) pushEnabled = s end)
-
-tx = 2
-createSmallToggle("KILL", tx, function(s) killAuraEnabled = s end)
-tx = tx + 85
-createSmallToggle("A.KILL", tx, function(s) autoKillEnabled = s end)
-tx = tx + 85
-createSmallToggle("SPEED", tx, function(s)
-    speedHackEnabled = s
-    local char = player.Character
-    if char and char:FindFirstChild("Humanoid") then
-        if s then
-            originalWalkSpeed = char.Humanoid.WalkSpeed
-            char.Humanoid.WalkSpeed = originalWalkSpeed * speedMultiplier
-        else
-            char.Humanoid.WalkSpeed = originalWalkSpeed
-        end
-    end
-end)
-tx = tx + 85
-createSmallToggle("NOCLIP", tx, function(s) noclipEnabled = s end)
-tx = tx + 85
-createSmallToggle("FARM", tx, function(s) autoFarmEnabled = s end)
-
--- РЯД 2: СЛАЙДЕРЫ
-local row2 = Instance.new("Frame")
-row2.Parent = contentFrame
-row2.Size = UDim2.new(1, 0, 0, 60)
-row2.Position = UDim2.new(0, 0, 0, 75)
-row2.BackgroundTransparency = 1
-
-local function createSmallSlider(text, xPos, minVal, maxVal, defaultVal, callback)
+local function createSliderInSection(parent, text, xPos, yPos, minVal, maxVal, defaultVal, callback)
     local frame = Instance.new("Frame")
-    frame.Parent = row2
+    frame.Parent = parent
     frame.Size = UDim2.new(0, 110, 0, 45)
-    frame.Position = UDim2.new(0, xPos, 0, 0)
+    frame.Position = UDim2.new(0, xPos, 0, yPos)
     frame.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
     frame.BackgroundTransparency = 0.15
     local fCorner = Instance.new("UICorner")
@@ -466,41 +424,64 @@ local function round(num)
     return math.floor(num * 100 + 0.5) / 100
 end
 
-local sx = 2
-createSmallSlider("HIT SIZE", sx, 1, 500, 5, function(v) hitboxSize = v end)
-sx = sx + 115
-createSmallSlider("SPIN SPD", sx, 100, 999, 999, function(v) spinSpeed = v end)
-sx = sx + 115
-createSmallSlider("AIM RNG", sx, 20, 150, 50, function(v) aimbotRange = v end)
-sx = sx + 115
-createSmallSlider("AIM FOV", sx, 15, 180, 60, function(v) aimbotFOV = v end)
+-- ===== РАЗДЕЛ 1: БОЕВЫЕ =====
+local section1, _ = createSection("⚔️ БОЕВЫЕ ФУНКЦИИ", 5)
+local s1y = 25
+createToggleInSection(section1, "HITBOX", 5, s1y, function(s) hitboxEnabled = s end)
+createToggleInSection(section1, "AIMBOT", 100, s1y, function(s) aimbotEnabled = s end)
+createToggleInSection(section1, "SPINBOT", 195, s1y, function(s) spinbotEnabled = s end)
+createToggleInSection(section1, "KILL AURA", 290, s1y, function(s) killAuraEnabled = s end)
+s1y = s1y + 35
+createToggleInSection(section1, "AUTO KILL", 5, s1y, function(s) autoKillEnabled = s end)
+createToggleInSection(section1, "PUSH", 100, s1y, function(s) pushEnabled = s end)
+createToggleInSection(section1, "TEAM CHECK", 195, s1y, function(s) checkTeammates = s end)
 
--- РЯД 3: СЛАЙДЕРЫ (второй ряд)
-local row3 = Instance.new("Frame")
-row3.Parent = contentFrame
-row3.Size = UDim2.new(1, 0, 0, 60)
-row3.Position = UDim2.new(0, 0, 0, 140)
-row3.BackgroundTransparency = 1
+-- ===== РАЗДЕЛ 2: ДВИЖЕНИЕ =====
+local section2, _ = createSection("🏃 ДВИЖЕНИЕ", 145)
+local s2y = 25
+createToggleInSection(section2, "SPEED", 5, s2y, function(s)
+    speedHackEnabled = s
+    local char = player.Character
+    if char and char:FindFirstChild("Humanoid") then
+        if s then
+            originalWalkSpeed = char.Humanoid.WalkSpeed
+            char.Humanoid.WalkSpeed = originalWalkSpeed * speedMultiplier
+        else
+            char.Humanoid.WalkSpeed = originalWalkSpeed
+        end
+    end
+end)
+createToggleInSection(section2, "NOCLIP", 100, s2y, function(s) noclipEnabled = s end)
+createToggleInSection(section2, "FARM", 195, s2y, function(s) autoFarmEnabled = s end)
+createToggleInSection(section2, "TELEPORT", 290, s2y, function(s) teleportEnabled = s end)
 
-local sx2 = 2
-createSmallSlider("PUSH PWR", sx2, 50, 500, 100, function(v) pushPower = v end)
-sx2 = sx2 + 115
-createSmallSlider("ESP RNG", sx2, 20, 100, 50, function(v) espRange = v end)
-sx2 = sx2 + 115
-createSmallSlider("KILL RNG", sx2, 10, 80, 30, function(v) killAuraRange = v end)
+-- ===== РАЗДЕЛ 3: ESP =====
+local section3, _ = createSection("👁️ ESP", 285)
+local s3y = 25
+createToggleInSection(section3, "ESP", 5, s3y, function(s) espEnabled = s end)
+s3y = s3y + 35
+createSliderInSection(section3, "ESP RNG", 5, s3y, 20, 100, 50, function(v) espRange = v end)
+createSliderInSection(section3, "HIT SIZE", 120, s3y, 1, 500, 5, function(v) hitboxSize = v end)
 
--- РЯД 4: КНОПКИ
-local row4 = Instance.new("Frame")
-row4.Parent = contentFrame
-row4.Size = UDim2.new(1, 0, 0, 30)
-row4.Position = UDim2.new(0, 0, 0, 205)
-row4.BackgroundTransparency = 1
+-- ===== РАЗДЕЛ 4: НАСТРОЙКИ =====
+local section4, _ = createSection("⚙️ НАСТРОЙКИ", 430)
+local s4y = 25
+createSliderInSection(section4, "SPIN SPD", 5, s4y, 100, 999, 999, function(v) spinSpeed = v end)
+createSliderInSection(section4, "AIM RNG", 120, s4y, 20, 150, 50, function(v) aimbotRange = v end)
+createSliderInSection(section4, "AIM FOV", 235, s4y, 15, 180, 60, function(v) aimbotFOV = v end)
+s4y = s4y + 50
+createSliderInSection(section4, "KILL RNG", 5, s4y, 10, 80, 30, function(v) killAuraRange = v end)
+createSliderInSection(section4, "PUSH PWR", 120, s4y, 50, 500, 100, function(v) pushPower = v end)
 
-local function createSmallButton(text, xPos, color, callback)
+-- ===== РАЗДЕЛ 5: КНОПКИ =====
+local section5, _ = createSection("📌 КНОПКИ", 580)
+local s5y = 25
+
+local function createActionButton(parent, text, xPos, color, callback)
     local btn = Instance.new("TextButton")
-    btn.Parent = row4
-    btn.Size = UDim2.new(0, 100, 0, 24)
-    btn.Position = UDim2.new(0, xPos, 0, 0)
+    btn.Parent = parent
+    btn.Size = UDim2.new(0, 100, 0, 28)
+    btn.Position = UDim2.new(0, xPos, 0, s5y)
     btn.Text = text
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 11
@@ -510,14 +491,13 @@ local function createSmallButton(text, xPos, color, callback)
     local btnCorner = Instance.new("UICorner")
     btnCorner.CornerRadius = UDim.new(0, 4)
     btnCorner.Parent = btn
-    
     btn.MouseButton1Click:Connect(callback)
     return btn
 end
 
-createSmallButton("TELEPORT", 2, Color3.fromRGB(0, 150, 255), teleportToPlayer)
-createSmallButton("PUSH NOW", 110, Color3.fromRGB(200, 100, 255), pushPlayer)
-createSmallButton("RESET", 218, Color3.fromRGB(255, 165, 0), function()
+createActionButton(section5, "TELEPORT", 5, Color3.fromRGB(0, 150, 255), teleportToPlayer)
+createActionButton(section5, "PUSH NOW", 110, Color3.fromRGB(200, 100, 255), pushPlayer)
+createActionButton(section5, "RESET", 215, Color3.fromRGB(255, 165, 0), function()
     hitboxEnabled = false
     aimbotEnabled = false
     spinbotEnabled = false
@@ -547,7 +527,7 @@ createSmallButton("RESET", 218, Color3.fromRGB(255, 165, 0), function()
     updateStatusDot()
     print("[RESET] Все функции сброшены")
 end)
-createSmallButton("ANTI BAN", 326, Color3.fromRGB(255, 50, 50), function()
+createActionButton(section5, "ANTI BAN", 320, Color3.fromRGB(255, 50, 50), function()
     antiBanEnabled = not antiBanEnabled
     print("[ANTI BAN] " .. (antiBanEnabled and "ВКЛЮЧЁН" or "ВЫКЛЮЧЁН"))
 end)
@@ -576,7 +556,6 @@ function pushPlayer()
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-    
     for _, plr in pairs(players:GetPlayers()) do
         if plr ~= player and plr.Character then
             local targetHrp = plr.Character:FindFirstChild("HumanoidRootPart")
@@ -585,24 +564,20 @@ function pushPlayer()
                 if dist < 10 then
                     local direction = (targetHrp.Position - hrp.Position).Unit
                     targetHrp.Velocity = direction * pushPower + Vector3.new(0, pushPower * 0.5, 0)
-                    print("[PUSH] " .. plr.Name .. " улетел!")
                 end
             end
         end
     end
 end
 
--- КАСАНИЕ ДЛЯ PUSH
 userInputService.TouchBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if not pushEnabled then return end
     if input.UserInputType ~= Enum.UserInputType.Touch then return end
-    
     local char = player.Character
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-    
     for _, plr in pairs(players:GetPlayers()) do
         if plr ~= player and plr.Character then
             local targetHrp = plr.Character:FindFirstChild("HumanoidRootPart")
@@ -611,7 +586,6 @@ userInputService.TouchBegan:Connect(function(input, gameProcessed)
                 if dist < 5 then
                     local direction = (targetHrp.Position - hrp.Position).Unit
                     targetHrp.Velocity = direction * pushPower + Vector3.new(0, pushPower * 0.5, 0)
-                    print("[PUSH] " .. plr.Name .. " улетел!")
                 end
             end
         end
@@ -622,9 +596,7 @@ end)
 local hitboxes = {}
 
 function clearHitboxes()
-    for _, box in pairs(hitboxes) do
-        pcall(function() box:Destroy() end)
-    end
+    for _, box in pairs(hitboxes) do pcall(function() box:Destroy() end) end
     hitboxes = {}
 end
 
@@ -632,14 +604,12 @@ function createHitbox(character, color)
     if not character then return end
     local hrp = character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-    
     for i = #hitboxes, 1, -1 do
         if hitboxes[i] and hitboxes[i].Parent == character then
             pcall(function() hitboxes[i]:Destroy() end)
             table.remove(hitboxes, i)
         end
     end
-    
     local box = Instance.new("Part")
     box.Size = Vector3.new(hitboxSize, hitboxSize * 0.8, hitboxSize * 0.5)
     box.Position = hrp.Position
@@ -648,7 +618,6 @@ function createHitbox(character, color)
     box.Transparency = 0.5
     box.BrickColor = BrickColor.new(color)
     box.Parent = character
-    
     local highlight = Instance.new("Highlight")
     highlight.Adornee = box
     highlight.FillColor = color
@@ -656,7 +625,6 @@ function createHitbox(character, color)
     highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
     highlight.OutlineTransparency = 0.3
     highlight.Parent = box
-    
     table.insert(hitboxes, box)
     return box
 end
@@ -696,7 +664,6 @@ function updateESP()
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-    
     for _, plr in pairs(players:GetPlayers()) do
         if plr ~= player and plr.Character then
             local targetHrp = plr.Character:FindFirstChild("HumanoidRootPart")
@@ -705,7 +672,6 @@ function updateESP()
                 if dist <= espRange then
                     local isTeammate = checkTeammates and isTeammateCheck(plr)
                     local color = isTeammate and teammateEspColor or espColor
-                    
                     local highlight = Instance.new("Highlight")
                     highlight.Adornee = plr.Character
                     highlight.FillColor = color
@@ -714,7 +680,6 @@ function updateESP()
                     highlight.OutlineTransparency = 0.2
                     highlight.Parent = plr.Character
                     table.insert(espObjects, highlight)
-                    
                     local box = Instance.new("BoxHandleAdornment")
                     box.Parent = plr.Character
                     box.Size = Vector3.new(4, 5, 2)
@@ -724,14 +689,12 @@ function updateESP()
                     box.Color3 = color
                     box.Transparency = 0.5
                     table.insert(espObjects, box)
-                    
                     local billboard = Instance.new("BillboardGui")
                     billboard.Parent = targetHrp
                     billboard.Size = UDim2.new(0, 200, 0, 50)
                     billboard.Adornee = targetHrp
                     billboard.AlwaysOnTop = true
                     billboard.StudsOffset = Vector3.new(0, 2.5, 0)
-                    
                     local label = Instance.new("TextLabel")
                     label.Parent = billboard
                     label.Size = UDim2.new(1, 0, 1, 0)
@@ -743,7 +706,6 @@ function updateESP()
                     label.TextStrokeTransparency = 0.3
                     label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
                     table.insert(espLabels, billboard)
-                    
                     if showLines then
                         local linePart = Instance.new("Part")
                         linePart.Parent = workspace
@@ -755,7 +717,6 @@ function updateESP()
                         linePart.BrickColor = BrickColor.new(color)
                         table.insert(espLines, linePart)
                     end
-                    
                     if not isTeammate then
                         local rainbowStroke = Instance.new("UIStroke")
                         rainbowStroke.Parent = plr.Character
@@ -764,14 +725,8 @@ function updateESP()
                         rainbowStroke.Color = Color3.fromRGB(255, 0, 0)
                         rainbowStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
                         table.insert(espRainbowOutlines, rainbowStroke)
-                        
                         spawn(function()
-                            local colors = {
-                                Color3.fromRGB(255, 0, 0), Color3.fromRGB(255, 165, 0),
-                                Color3.fromRGB(255, 255, 0), Color3.fromRGB(0, 255, 0),
-                                Color3.fromRGB(0, 0, 255), Color3.fromRGB(75, 0, 130),
-                                Color3.fromRGB(238, 130, 238)
-                            }
+                            local colors = {Color3.fromRGB(255,0,0), Color3.fromRGB(255,165,0), Color3.fromRGB(255,255,0), Color3.fromRGB(0,255,0), Color3.fromRGB(0,0,255), Color3.fromRGB(75,0,130), Color3.fromRGB(238,130,238)}
                             local i = 1
                             while rainbowStroke and rainbowStroke.Parent do
                                 rainbowStroke.Color = colors[i]
@@ -791,12 +746,8 @@ end
 local fovCircle = nil
 
 function createFOVCircle()
-    if fovCircle then
-        pcall(function() fovCircle:Destroy() end)
-        fovCircle = nil
-    end
+    if fovCircle then pcall(function() fovCircle:Destroy() end) fovCircle = nil end
     if not aimbotEnabled then return end
-    
     fovCircle = Instance.new("CircleHandleAdornment")
     fovCircle.Parent = camera
     fovCircle.Radius = aimbotFOV / 2
@@ -812,11 +763,9 @@ function getClosestTarget()
     if not char then return nil end
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return nil end
-    
     local center = camera.ViewportSize / 2
     local closestDist = aimbotFOV
     local closestTarget = nil
-    
     for _, plr in pairs(players:GetPlayers()) do
         if plr ~= player and plr.Character then
             if checkTeammates and isTeammateCheck(plr) then continue end
@@ -844,7 +793,6 @@ function killAura()
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-    
     for _, plr in pairs(players:GetPlayers()) do
         if plr ~= player and plr.Character then
             if checkTeammates and isTeammateCheck(plr) then continue end
@@ -874,7 +822,6 @@ function autoKill()
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-    
     for _, plr in pairs(players:GetPlayers()) do
         if plr ~= player and plr.Character then
             if checkTeammates and isTeammateCheck(plr) then continue end
@@ -900,10 +847,8 @@ function teleportToPlayer()
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-    
     local target = nil
     local minDist = teleportRange
-    
     for _, plr in pairs(players:GetPlayers()) do
         if plr ~= player and plr.Character then
             local pos = plr.Character:FindFirstChild("HumanoidRootPart")
@@ -916,7 +861,6 @@ function teleportToPlayer()
             end
         end
     end
-    
     if target then
         hrp.CFrame = CFrame.new(target.Position + Vector3.new(0, 2, 0))
         print("[TELEPORT] Телепорт выполнен")
@@ -952,7 +896,6 @@ end
 runService.RenderStepped:Connect(function()
     if hitboxEnabled then updateHitboxes() else clearHitboxes() end
     if espEnabled then updateESP() else clearESP() end
-    
     if aimbotEnabled then
         if not fovCircle then createFOVCircle() end
         if fovCircle then
@@ -960,12 +903,8 @@ runService.RenderStepped:Connect(function()
             fovCircle.Visible = true
         end
     else
-        if fovCircle then
-            pcall(function() fovCircle:Destroy() end)
-            fovCircle = nil
-        end
+        if fovCircle then pcall(function() fovCircle:Destroy() end) fovCircle = nil end
     end
-    
     if aimbotEnabled then
         local target = getClosestTarget()
         if target then
@@ -982,12 +921,10 @@ runService.RenderStepped:Connect(function()
             end
         end
     end
-    
     if spinbotEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local hrp = player.Character.HumanoidRootPart
         hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(spinSpeed / 30), 0)
     end
-    
     if killAuraEnabled then killAura() end
     if autoKillEnabled then autoKill() end
     if pushEnabled then pushPlayer() end
@@ -999,7 +936,6 @@ runService.Stepped:Connect(function()
     elseif player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         player.Character.HumanoidRootPart.CanCollide = true
     end
-    
     if autoFarmEnabled then autoFarm() end
     if teleportEnabled then
         teleportToPlayer()
@@ -1007,7 +943,7 @@ runService.Stepped:Connect(function()
     end
 end)
 
--- ===== ГОРЯЧИЕ КЛАВИШИ (для отладки, на телефоне не нужны) =====
+-- ===== ГОРЯЧИЕ КЛАВИШИ =====
 userInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.F1 then
@@ -1038,14 +974,10 @@ player.CharacterRemoving:Connect(function()
     pushEnabled = false
     clearHitboxes()
     clearESP()
-    if fovCircle then
-        pcall(function() fovCircle:Destroy() end)
-        fovCircle = nil
-    end
+    if fovCircle then pcall(function() fovCircle:Destroy() end) fovCircle = nil end
     updateStatusDot()
 end)
 
--- ===== ПРИВЕТСТВИЕ =====
-print("HITBOX PRO LOADED (PHONE EDITION)")
+print("HITBOX PRO LOADED (ALL FUNCTIONS)")
 print("Нажми на чёрную иконку H для открытия меню")
 updateStatusDot()
