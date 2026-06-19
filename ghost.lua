@@ -1,11 +1,9 @@
--- НАЗВАНИЕ СКРИПТА: HITBOX + AIMBOT + SPINBOT + KILLAURA PRO (WIDE MENU)
--- ДЛЯ ТЕЛЕФОНА
--- АВАТАРКА С РАДУЖНОЙ ОБВОДКОЙ (ПЕРЕТАСКИВАЕТСЯ)
--- ESP: ИМЯ, МЕТРЫ, КВАДРАТ, РАДУЖНАЯ ОБВОДКА, ЛИНИЯ
--- НОВАЯ ФУНКЦИЯ: PUSH (при касании игрок улетает)
+-- НАЗВАНИЕ СКРИПТА: HITBOX + AIMBOT + SPINBOT + KILLAURA + PUSH PRO
+-- ТОЛЬКО ДЛЯ ТЕЛЕФОНА
+-- МЕНЮ ВВЕРХУ ПО ЦЕНТРУ С АНИМАЦИЕЙ
+-- ЧЁРНАЯ ИКОНКА
 
 local player = game.Players.LocalPlayer
-local mouse = player:GetMouse()
 local runService = game:GetService("RunService")
 local userInputService = game:GetService("UserInputService")
 local camera = workspace.CurrentCamera
@@ -25,7 +23,6 @@ local antiBanEnabled = false
 local killAuraEnabled = false
 local autoKillEnabled = false
 local pushEnabled = false
-local pushPower = 100
 
 local hitboxSize = 5
 local aimbotRange = 50
@@ -39,6 +36,7 @@ local teleportRange = 50
 local farmDelay = 0.5
 local killAuraRange = 30
 local killAuraDelay = 0.1
+local pushPower = 100
 local espColor = Color3.fromRGB(0, 255, 0)
 local teammateEspColor = Color3.fromRGB(0, 150, 255)
 local showLines = true
@@ -53,21 +51,31 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- ===== АВАТАРКА С РАДУЖНОЙ ОБВОДКОЙ =====
+-- ===== ЧЁРНАЯ ИКОНКА (без картинки) =====
 local iconButton = Instance.new("ImageButton")
 iconButton.Parent = screenGui
 iconButton.Size = UDim2.new(0, 55, 0, 55)
 iconButton.Position = UDim2.new(0.02, 0, 0.85, 0)
-iconButton.BackgroundColor3 = Color3.fromRGB(180, 20, 30)
+iconButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 iconButton.BackgroundTransparency = 0.1
-iconButton.BorderSizePixel = 0
-iconButton.Image = "rbxassetid://6031090977"
-iconButton.ImageTransparency = 0.2
-iconButton.AutoButtonColor = true
+iconButton.BorderSizePixel = 2
+iconButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
+iconButton.Image = ""
+iconButton.ImageTransparency = 1
 
 local iconCorner = Instance.new("UICorner")
 iconCorner.CornerRadius = UDim.new(1, 0)
 iconCorner.Parent = iconButton
+
+-- Буква H на иконке
+local letter = Instance.new("TextLabel")
+letter.Parent = iconButton
+letter.Size = UDim2.new(1, 0, 1, 0)
+letter.BackgroundTransparency = 1
+letter.Text = "H"
+letter.TextColor3 = Color3.fromRGB(255, 255, 255)
+letter.TextScaled = true
+letter.Font = Enum.Font.GothamBold
 
 -- РАДУЖНАЯ ОБВОДКА
 local glowBorder = Instance.new("UIStroke")
@@ -105,13 +113,13 @@ local statusCorner = Instance.new("UICorner")
 statusCorner.CornerRadius = UDim.new(1, 0)
 statusCorner.Parent = statusIndicator
 
--- ПЕРЕТАСКИВАНИЕ АВАТАРКИ
+-- ПЕРЕТАСКИВАНИЕ ИКОНКИ
 local avatarDragging = false
 local avatarDragStart = nil
 local avatarFrameStart = nil
 
 iconButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.Touch then
         avatarDragging = true
         avatarDragStart = input.Position
         avatarFrameStart = iconButton.Position
@@ -119,7 +127,7 @@ iconButton.InputBegan:Connect(function(input)
 end)
 
 iconButton.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.Touch then
         avatarDragging = false
     end
 end)
@@ -136,16 +144,11 @@ userInputService.TouchMoved:Connect(function(input)
     end
 end)
 
--- ОТКРЫТИЕ МЕНЮ ПО КЛИКУ НА ИКОНКУ
-iconButton.MouseButton1Click:Connect(function()
-    mainFrame.Visible = not mainFrame.Visible
-end)
-
--- ===== МЕНЮ (ШИРОКОЕ, НО НЕ ВЫСОКОЕ) =====
+-- ===== МЕНЮ ВВЕРХУ ПО ЦЕНТРУ =====
 local mainFrame = Instance.new("Frame")
 mainFrame.Parent = screenGui
-mainFrame.Size = UDim2.new(0, math.min(500, camera.ViewportSize.X - 20), 0, 300)
-mainFrame.Position = UDim2.new(0.5, -mainFrame.Size.X.Offset / 2, 0.5, -150)
+mainFrame.Size = UDim2.new(0, math.min(480, camera.ViewportSize.X - 20), 0, 280)
+mainFrame.Position = UDim2.new(0.5, -mainFrame.Size.X.Offset / 2, 0.05, 0)
 mainFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 35)
 mainFrame.BackgroundTransparency = 0.08
 mainFrame.BorderSizePixel = 2
@@ -154,9 +157,10 @@ mainFrame.Visible = false
 mainFrame.ClipsDescendants = true
 
 local mainCorner = Instance.new("UICorner")
-mainCorner.CornerRadius = UDim.new(0, 12)
+mainCorner.CornerRadius = UDim.new(0, 16)
 mainCorner.Parent = mainFrame
 
+-- ТЕНЬ
 local shadow = Instance.new("Frame")
 shadow.Parent = mainFrame
 shadow.Size = UDim2.new(1, 0, 1, 0)
@@ -164,7 +168,7 @@ shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 shadow.BackgroundTransparency = 0.6
 shadow.BorderSizePixel = 0
 local shadowCorner = Instance.new("UICorner")
-shadowCorner.CornerRadius = UDim.new(0, 12)
+shadowCorner.CornerRadius = UDim.new(0, 16)
 shadowCorner.Parent = shadow
 
 -- БАННЕР
@@ -176,7 +180,7 @@ banner.BackgroundTransparency = 0.1
 banner.BorderSizePixel = 0
 
 local bannerCorner = Instance.new("UICorner")
-bannerCorner.CornerRadius = UDim.new(0, 12)
+bannerCorner.CornerRadius = UDim.new(0, 16)
 bannerCorner.Parent = banner
 
 local title = Instance.new("TextLabel")
@@ -205,7 +209,7 @@ closeCorner.CornerRadius = UDim.new(1, 0)
 closeCorner.Parent = closeBtn
 
 closeBtn.MouseButton1Click:Connect(function()
-    mainFrame.Visible = false
+    closeMenu()
 end)
 
 -- ПЕРЕТАСКИВАНИЕ МЕНЮ
@@ -214,7 +218,7 @@ local menuDragStart = nil
 local menuFrameStart = nil
 
 banner.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.Touch then
         menuDragging = true
         menuDragStart = input.Position
         menuFrameStart = mainFrame.Position
@@ -222,7 +226,7 @@ banner.InputBegan:Connect(function(input)
 end)
 
 banner.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.Touch then
         menuDragging = false
     end
 end)
@@ -239,7 +243,42 @@ userInputService.TouchMoved:Connect(function(input)
     end
 end)
 
--- ===== КОНТЕНТ (ТОГГЛЫ + СЛАЙДЕРЫ) =====
+-- ===== АНИМАЦИЯ ОТКРЫТИЯ =====
+local function openMenu()
+    mainFrame.Visible = true
+    mainFrame.Size = UDim2.new(0, 0, 0, 0)
+    mainFrame.Position = UDim2.new(0.5, 0, 0.05, 0)
+    mainFrame.BackgroundTransparency = 1
+    
+    local targetSize = UDim2.new(0, math.min(480, camera.ViewportSize.X - 20), 0, 280)
+    local targetPos = UDim2.new(0.5, -targetSize.X.Offset / 2, 0.05, 0)
+    
+    tweenService:Create(mainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = targetSize,
+        Position = targetPos,
+        BackgroundTransparency = 0.08
+    }):Play()
+end
+
+local function closeMenu()
+    tweenService:Create(mainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+        Size = UDim2.new(0, 0, 0, 0),
+        BackgroundTransparency = 1
+    }):Play()
+    task.wait(0.2)
+    mainFrame.Visible = false
+end
+
+-- ===== КЛИК ПО ИКОНКЕ =====
+iconButton.MouseButton1Click:Connect(function()
+    if mainFrame.Visible then
+        closeMenu()
+    else
+        openMenu()
+    end
+end)
+
+-- ===== КОНТЕНТ МЕНЮ =====
 local contentFrame = Instance.new("Frame")
 contentFrame.Parent = mainFrame
 contentFrame.Size = UDim2.new(1, -10, 1, -45)
@@ -249,13 +288,13 @@ contentFrame.BackgroundTransparency = 1
 -- РЯД 1: ТОГГЛЫ
 local row1 = Instance.new("Frame")
 row1.Parent = contentFrame
-row1.Size = UDim2.new(1, 0, 0, 80)
+row1.Size = UDim2.new(1, 0, 0, 70)
 row1.BackgroundTransparency = 1
 
 local function createSmallToggle(text, xPos, callback)
     local frame = Instance.new("Frame")
     frame.Parent = row1
-    frame.Size = UDim2.new(0, 85, 0, 35)
+    frame.Size = UDim2.new(0, 80, 0, 32)
     frame.Position = UDim2.new(0, xPos, 0, 0)
     frame.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
     frame.BackgroundTransparency = 0.15
@@ -301,20 +340,20 @@ end
 
 local tx = 2
 createSmallToggle("HITBOX", tx, function(s) hitboxEnabled = s end)
-tx = tx + 90
+tx = tx + 85
 createSmallToggle("AIMBOT", tx, function(s) aimbotEnabled = s end)
-tx = tx + 90
+tx = tx + 85
 createSmallToggle("SPINBOT", tx, function(s) spinbotEnabled = s end)
-tx = tx + 90
+tx = tx + 85
 createSmallToggle("ESP", tx, function(s) espEnabled = s end)
-tx = tx + 90
+tx = tx + 85
 createSmallToggle("PUSH", tx, function(s) pushEnabled = s end)
 
 tx = 2
-createSmallToggle("KILL", tx + 0, function(s) killAuraEnabled = s end)
-tx = tx + 90
+createSmallToggle("KILL", tx, function(s) killAuraEnabled = s end)
+tx = tx + 85
 createSmallToggle("A.KILL", tx, function(s) autoKillEnabled = s end)
-tx = tx + 90
+tx = tx + 85
 createSmallToggle("SPEED", tx, function(s)
     speedHackEnabled = s
     local char = player.Character
@@ -327,22 +366,22 @@ createSmallToggle("SPEED", tx, function(s)
         end
     end
 end)
-tx = tx + 90
+tx = tx + 85
 createSmallToggle("NOCLIP", tx, function(s) noclipEnabled = s end)
-tx = tx + 90
+tx = tx + 85
 createSmallToggle("FARM", tx, function(s) autoFarmEnabled = s end)
 
 -- РЯД 2: СЛАЙДЕРЫ
 local row2 = Instance.new("Frame")
 row2.Parent = contentFrame
-row2.Size = UDim2.new(1, 0, 0, 65)
-row2.Position = UDim2.new(0, 0, 0, 85)
+row2.Size = UDim2.new(1, 0, 0, 60)
+row2.Position = UDim2.new(0, 0, 0, 75)
 row2.BackgroundTransparency = 1
 
 local function createSmallSlider(text, xPos, minVal, maxVal, defaultVal, callback)
     local frame = Instance.new("Frame")
     frame.Parent = row2
-    frame.Size = UDim2.new(0, 110, 0, 50)
+    frame.Size = UDim2.new(0, 110, 0, 45)
     frame.Position = UDim2.new(0, xPos, 0, 0)
     frame.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
     frame.BackgroundTransparency = 0.15
@@ -404,7 +443,7 @@ local function createSmallSlider(text, xPos, minVal, maxVal, defaultVal, callbac
     end
     
     slider.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             updateSlider(input)
         end
@@ -435,20 +474,32 @@ sx = sx + 115
 createSmallSlider("AIM RNG", sx, 20, 150, 50, function(v) aimbotRange = v end)
 sx = sx + 115
 createSmallSlider("AIM FOV", sx, 15, 180, 60, function(v) aimbotFOV = v end)
-sx = sx + 115
-createSmallSlider("PUSH PWR", sx, 50, 500, 100, function(v) pushPower = v end)
 
--- РЯД 3: КНОПКИ
+-- РЯД 3: СЛАЙДЕРЫ (второй ряд)
 local row3 = Instance.new("Frame")
 row3.Parent = contentFrame
-row3.Size = UDim2.new(1, 0, 0, 30)
-row3.Position = UDim2.new(0, 0, 0, 155)
+row3.Size = UDim2.new(1, 0, 0, 60)
+row3.Position = UDim2.new(0, 0, 0, 140)
 row3.BackgroundTransparency = 1
+
+local sx2 = 2
+createSmallSlider("PUSH PWR", sx2, 50, 500, 100, function(v) pushPower = v end)
+sx2 = sx2 + 115
+createSmallSlider("ESP RNG", sx2, 20, 100, 50, function(v) espRange = v end)
+sx2 = sx2 + 115
+createSmallSlider("KILL RNG", sx2, 10, 80, 30, function(v) killAuraRange = v end)
+
+-- РЯД 4: КНОПКИ
+local row4 = Instance.new("Frame")
+row4.Parent = contentFrame
+row4.Size = UDim2.new(1, 0, 0, 30)
+row4.Position = UDim2.new(0, 0, 0, 205)
+row4.BackgroundTransparency = 1
 
 local function createSmallButton(text, xPos, color, callback)
     local btn = Instance.new("TextButton")
-    btn.Parent = row3
-    btn.Size = UDim2.new(0, 110, 0, 24)
+    btn.Parent = row4
+    btn.Size = UDim2.new(0, 100, 0, 24)
     btn.Position = UDim2.new(0, xPos, 0, 0)
     btn.Text = text
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -465,7 +516,8 @@ local function createSmallButton(text, xPos, color, callback)
 end
 
 createSmallButton("TELEPORT", 2, Color3.fromRGB(0, 150, 255), teleportToPlayer)
-createSmallButton("RESET", 120, Color3.fromRGB(255, 165, 0), function()
+createSmallButton("PUSH NOW", 110, Color3.fromRGB(200, 100, 255), pushPlayer)
+createSmallButton("RESET", 218, Color3.fromRGB(255, 165, 0), function()
     hitboxEnabled = false
     aimbotEnabled = false
     spinbotEnabled = false
@@ -495,12 +547,9 @@ createSmallButton("RESET", 120, Color3.fromRGB(255, 165, 0), function()
     updateStatusDot()
     print("[RESET] Все функции сброшены")
 end)
-createSmallButton("ANTI BAN", 238, Color3.fromRGB(255, 50, 50), function()
+createSmallButton("ANTI BAN", 326, Color3.fromRGB(255, 50, 50), function()
     antiBanEnabled = not antiBanEnabled
     print("[ANTI BAN] " .. (antiBanEnabled and "ВКЛЮЧЁН" or "ВЫКЛЮЧЁН"))
-end)
-createSmallButton("PUSH NOW", 356, Color3.fromRGB(200, 100, 255), function()
-    pushPlayer()
 end)
 
 -- ===== ФУНКЦИИ =====
@@ -520,7 +569,7 @@ local function isTeammateCheck(targetPlayer)
     return false
 end
 
--- ===== PUSH ФУНКЦИЯ (игрок улетает) =====
+-- ===== PUSH =====
 function pushPlayer()
     if not pushEnabled then return end
     local char = player.Character
@@ -536,20 +585,19 @@ function pushPlayer()
                 if dist < 10 then
                     local direction = (targetHrp.Position - hrp.Position).Unit
                     targetHrp.Velocity = direction * pushPower + Vector3.new(0, pushPower * 0.5, 0)
-                    print("[PUSH] Игрок " .. plr.Name .. " улетел!")
+                    print("[PUSH] " .. plr.Name .. " улетел!")
                 end
             end
         end
     end
 end
 
--- ОТСЛЕЖИВАНИЕ КАСАНИЯ (при дотрагивании до игрока)
+-- КАСАНИЕ ДЛЯ PUSH
 userInputService.TouchBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if not pushEnabled then return end
     if input.UserInputType ~= Enum.UserInputType.Touch then return end
     
-    -- Проверяем, что касание было по игроку
     local char = player.Character
     if not char then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
@@ -563,7 +611,7 @@ userInputService.TouchBegan:Connect(function(input, gameProcessed)
                 if dist < 5 then
                     local direction = (targetHrp.Position - hrp.Position).Unit
                     targetHrp.Velocity = direction * pushPower + Vector3.new(0, pushPower * 0.5, 0)
-                    print("[PUSH] Игрок " .. plr.Name .. " улетел!")
+                    print("[PUSH] " .. plr.Name .. " улетел!")
                 end
             end
         end
@@ -631,21 +679,13 @@ local espLines = {}
 local espRainbowOutlines = {}
 
 function clearESP()
-    for _, obj in pairs(espObjects) do
-        pcall(function() obj:Destroy() end)
-    end
+    for _, obj in pairs(espObjects) do pcall(function() obj:Destroy() end) end
     espObjects = {}
-    for _, obj in pairs(espLabels) do
-        pcall(function() obj:Destroy() end)
-    end
+    for _, obj in pairs(espLabels) do pcall(function() obj:Destroy() end) end
     espLabels = {}
-    for _, obj in pairs(espLines) do
-        pcall(function() obj:Destroy() end)
-    end
+    for _, obj in pairs(espLines) do pcall(function() obj:Destroy() end) end
     espLines = {}
-    for _, obj in pairs(espRainbowOutlines) do
-        pcall(function() obj:Destroy() end)
-    end
+    for _, obj in pairs(espRainbowOutlines) do pcall(function() obj:Destroy() end) end
     espRainbowOutlines = {}
 end
 
@@ -967,10 +1007,12 @@ runService.Stepped:Connect(function()
     end
 end)
 
--- ===== ГОРЯЧИЕ КЛАВИШИ =====
+-- ===== ГОРЯЧИЕ КЛАВИШИ (для отладки, на телефоне не нужны) =====
 userInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
-    if input.KeyCode == Enum.KeyCode.F1 then mainFrame.Visible = not mainFrame.Visible end
+    if input.KeyCode == Enum.KeyCode.F1 then
+        if mainFrame.Visible then closeMenu() else openMenu() end
+    end
     if input.KeyCode == Enum.KeyCode.F2 then hitboxEnabled = not hitboxEnabled updateStatusDot() end
     if input.KeyCode == Enum.KeyCode.F3 then aimbotEnabled = not aimbotEnabled updateStatusDot() end
     if input.KeyCode == Enum.KeyCode.F4 then spinbotEnabled = not spinbotEnabled updateStatusDot() end
@@ -1004,7 +1046,6 @@ player.CharacterRemoving:Connect(function()
 end)
 
 -- ===== ПРИВЕТСТВИЕ =====
-print("HITBOX + AIMBOT + SPINBOT + KILLAURA + PUSH PRO LOADED")
-print("F1 - MENU | F2 - HITBOX | F3 - AIMBOT | F4 - SPINBOT")
-print("F5 - ESP | F6 - SPEED | F7 - NOCLIP | F8 - KILLAURA | F9 - PUSH")
+print("HITBOX PRO LOADED (PHONE EDITION)")
+print("Нажми на чёрную иконку H для открытия меню")
 updateStatusDot()
