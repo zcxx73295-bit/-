@@ -1,6 +1,7 @@
--- НАЗВАНИЕ СКРИПТА: HITBOX + AIMBOT + SPINBOT + KILLAURA PRO
+-- НАЗВАНИЕ СКРИПТА: HITBOX + AIMBOT + SPINBOT + KILLAURA PRO (WIDE MENU)
 -- ДЛЯ ТЕЛЕФОНА
--- ФУНКЦИИ: Хитбоксы прозрачные, ESP с именем/дистанцией, SpinBot быстрый, KillAura, AutoKill, FOV круг, SpeedHack, Teleport, Noclip, AutoFarm
+-- АВАТАРКА С РАДУЖНОЙ ОБВОДКОЙ (ПЕРЕТАСКИВАЕТСЯ)
+-- ESP: ИМЯ, МЕТРЫ, КВАДРАТ, РАДУЖНАЯ ОБВОДКА, ЛИНИЯ
 
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
@@ -35,8 +36,9 @@ local teleportRange = 50
 local farmDelay = 0.5
 local killAuraRange = 30
 local killAuraDelay = 0.1
-local espColor = Color3.fromRGB(255, 0, 0)
-local teammateEspColor = Color3.fromRGB(0, 255, 0)
+local espColor = Color3.fromRGB(0, 255, 0) -- ЗЕЛЁНЫЙ
+local teammateEspColor = Color3.fromRGB(0, 150, 255) -- СИНИЙ (для тиммейтов)
+local showLines = true -- ЛИНИИ ВКЛЮЧЕНЫ ПО УМОЛЧАНИЮ
 
 local originalWalkSpeed = 16
 local originalJumpPower = 50
@@ -48,39 +50,96 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- ИКОНКА
+-- ===== АВАТАРКА С РАДУЖНОЙ ОБВОДКОЙ =====
 local iconButton = Instance.new("ImageButton")
 iconButton.Parent = screenGui
-iconButton.Size = UDim2.new(0, 50, 0, 50)
+iconButton.Size = UDim2.new(0, 60, 0, 60)
 iconButton.Position = UDim2.new(0.02, 0, 0.85, 0)
-iconButton.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-iconButton.BackgroundTransparency = 0.15
-iconButton.BorderSizePixel = 2
-iconButton.BorderColor3 = Color3.fromRGB(255, 50, 50)
+iconButton.BackgroundColor3 = Color3.fromRGB(180, 20, 30)
+iconButton.BackgroundTransparency = 0.1
+iconButton.BorderSizePixel = 3
 iconButton.Image = "rbxassetid://6031090977"
-iconButton.ImageTransparency = 0.1
+iconButton.ImageTransparency = 0.2
 
 local iconCorner = Instance.new("UICorner")
 iconCorner.CornerRadius = UDim.new(1, 0)
 iconCorner.Parent = iconButton
 
+-- РАДУЖНАЯ ОБВОДКА АВАТАРКИ
+local glowBorder = Instance.new("UIStroke")
+glowBorder.Parent = iconButton
+glowBorder.Thickness = 3
+glowBorder.Transparency = 0.1
+glowBorder.Color = Color3.fromRGB(255, 0, 0)
+glowBorder.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+spawn(function()
+    local colors = {
+        Color3.fromRGB(255, 0, 0),
+        Color3.fromRGB(255, 165, 0),
+        Color3.fromRGB(255, 255, 0),
+        Color3.fromRGB(0, 255, 0),
+        Color3.fromRGB(0, 0, 255),
+        Color3.fromRGB(75, 0, 130),
+        Color3.fromRGB(238, 130, 238)
+    }
+    local i = 1
+    while true do
+        glowBorder.Color = colors[i]
+        i = i + 1
+        if i > #colors then i = 1 end
+        task.wait(0.15)
+    end
+end)
+
+-- СТАТУС
 local statusIndicator = Instance.new("Frame")
 statusIndicator.Parent = iconButton
-statusIndicator.Size = UDim2.new(0, 10, 0, 10)
+statusIndicator.Size = UDim2.new(0, 12, 0, 12)
 statusIndicator.Position = UDim2.new(0.75, 0, 0.75, 0)
 statusIndicator.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 statusIndicator.BorderSizePixel = 2
 statusIndicator.BorderColor3 = Color3.fromRGB(255, 255, 255)
-
 local statusCorner = Instance.new("UICorner")
 statusCorner.CornerRadius = UDim.new(1, 0)
 statusCorner.Parent = statusIndicator
 
--- ГЛАВНОЕ МЕНЮ
+-- ПЕРЕТАСКИВАНИЕ АВАТАРКИ
+local avatarDragging = false
+local avatarDragStart = nil
+local avatarFrameStart = nil
+
+iconButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        avatarDragging = true
+        avatarDragStart = input.Position
+        avatarFrameStart = iconButton.Position
+    end
+end)
+
+iconButton.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        avatarDragging = false
+    end
+end)
+
+userInputService.TouchMoved:Connect(function(input)
+    if avatarDragging and input.UserInputType == Enum.UserInputType.Touch then
+        local delta = input.Position - avatarDragStart
+        iconButton.Position = UDim2.new(
+            avatarFrameStart.X.Scale,
+            avatarFrameStart.X.Offset + delta.X,
+            avatarFrameStart.Y.Scale,
+            avatarFrameStart.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- ГЛАВНОЕ МЕНЮ (В ШИРИНУ)
 local mainFrame = Instance.new("Frame")
 mainFrame.Parent = screenGui
-mainFrame.Size = UDim2.new(0, 340, 0, 500)
-mainFrame.Position = UDim2.new(0.5, -170, 0.5, -250)
+mainFrame.Size = UDim2.new(0, 540, 0, 370)
+mainFrame.Position = UDim2.new(0.5, -270, 0.5, -185)
 mainFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 35)
 mainFrame.BackgroundTransparency = 0.08
 mainFrame.BorderSizePixel = 2
@@ -105,7 +164,7 @@ shadowCorner.Parent = shadow
 -- БАННЕР
 local banner = Instance.new("Frame")
 banner.Parent = mainFrame
-banner.Size = UDim2.new(1, 0, 0, 50)
+banner.Size = UDim2.new(1, 0, 0, 40)
 banner.BackgroundColor3 = Color3.fromRGB(200, 30, 40)
 banner.BackgroundTransparency = 0.1
 banner.BorderSizePixel = 0
@@ -116,7 +175,7 @@ bannerCorner.Parent = banner
 
 local title = Instance.new("TextLabel")
 title.Parent = banner
-title.Size = UDim2.new(1, -45, 1, 0)
+title.Size = UDim2.new(1, -40, 1, 0)
 title.Position = UDim2.new(0, 8, 0, 0)
 title.BackgroundTransparency = 1
 title.Text = "HITBOX PRO"
@@ -124,17 +183,6 @@ title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextScaled = true
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Font = Enum.Font.GothamBold
-
-local subTitle = Instance.new("TextLabel")
-subTitle.Parent = banner
-subTitle.Size = UDim2.new(1, -45, 0.3, 0)
-subTitle.Position = UDim2.new(0, 8, 0.65, 0)
-subTitle.BackgroundTransparency = 1
-subTitle.Text = "All Functions"
-subTitle.TextColor3 = Color3.fromRGB(255, 200, 200)
-subTitle.TextSize = 10
-subTitle.TextXAlignment = Enum.TextXAlignment.Left
-subTitle.Font = Enum.Font.Gotham
 
 local closeBtn = Instance.new("TextButton")
 closeBtn.Parent = banner
@@ -154,7 +202,7 @@ closeBtn.MouseButton1Click:Connect(function()
     mainFrame.Visible = false
 end)
 
--- ПЕРЕТАСКИВАНИЕ
+-- ПЕРЕТАСКИВАНИЕ МЕНЮ
 local menuDragging = false
 local menuDragStart = nil
 local menuFrameStart = nil
@@ -185,43 +233,18 @@ userInputService.TouchMoved:Connect(function(input)
     end
 end)
 
--- СКРОЛЛ
-local contentFrame = Instance.new("ScrollingFrame")
-contentFrame.Parent = mainFrame
-contentFrame.Size = UDim2.new(1, -16, 1, -70)
-contentFrame.Position = UDim2.new(0, 8, 0, 60)
-contentFrame.BackgroundTransparency = 1
-contentFrame.ScrollBarThickness = 3
-contentFrame.ScrollBarImageColor3 = Color3.fromRGB(150, 150, 150)
-contentFrame.CanvasSize = UDim2.new(0, 0, 0, 950)
+-- ===== ВЕРХНИЙ РЯД (TOGGLES) =====
+local topRow = Instance.new("Frame")
+topRow.Parent = mainFrame
+topRow.Size = UDim2.new(1, -16, 0, 110)
+topRow.Position = UDim2.new(0, 8, 0, 48)
+topRow.BackgroundTransparency = 1
 
--- ===== УТИЛИТЫ =====
-local function round(num)
-    return math.floor(num * 100 + 0.5) / 100
-end
-
-local function updateStatusDot()
-    if hitboxEnabled or aimbotEnabled or spinbotEnabled or espEnabled or speedHackEnabled or noclipEnabled or autoFarmEnabled or teleportEnabled or killAuraEnabled or autoKillEnabled then
-        statusIndicator.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-    else
-        statusIndicator.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    end
-end
-
-local function isTeammateCheck(targetPlayer)
-    if player.Team and targetPlayer.Team == player.Team then return true end
-    if player:FindFirstChild("Team") and targetPlayer:FindFirstChild("Team") then
-        if player.Team.Name == targetPlayer.Team.Name then return true end
-    end
-    return false
-end
-
--- ===== СОЗДАНИЕ TOGGLE =====
-function createToggle(text, yPos, callback)
+local function createWideToggle(text, xPos, yPos, callback)
     local frame = Instance.new("Frame")
-    frame.Parent = contentFrame
-    frame.Size = UDim2.new(0.95, 0, 0, 38)
-    frame.Position = UDim2.new(0.025, 0, 0, yPos)
+    frame.Parent = topRow
+    frame.Size = UDim2.new(0, 100, 0, 45)
+    frame.Position = UDim2.new(0, xPos, 0, yPos)
     frame.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
     frame.BackgroundTransparency = 0.15
     local fCorner = Instance.new("UICorner")
@@ -230,22 +253,22 @@ function createToggle(text, yPos, callback)
     
     local label = Instance.new("TextLabel")
     label.Parent = frame
-    label.Size = UDim2.new(0.55, 0, 1, 0)
-    label.Position = UDim2.new(0.05, 0, 0, 0)
+    label.Size = UDim2.new(1, 0, 0.5, 0)
+    label.Position = UDim2.new(0, 0, 0, 0)
     label.BackgroundTransparency = 1
-    label.Text = text .. " OFF"
+    label.Text = text
     label.TextColor3 = Color3.fromRGB(220, 220, 220)
-    label.TextSize = 13
-    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.TextSize = 10
+    label.TextXAlignment = Enum.TextXAlignment.Center
     label.Font = Enum.Font.GothamBold
     
     local btn = Instance.new("TextButton")
     btn.Parent = frame
-    btn.Size = UDim2.new(0, 60, 0, 26)
-    btn.Position = UDim2.new(1, -68, 0.5, -13)
+    btn.Size = UDim2.new(0, 50, 0, 18)
+    btn.Position = UDim2.new(0.5, -25, 0.55, 0)
     btn.Text = "OFF"
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 12
+    btn.TextSize = 10
     btn.Font = Enum.Font.GothamBold
     btn.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
     local bCorner = Instance.new("UICorner")
@@ -257,7 +280,6 @@ function createToggle(text, yPos, callback)
         state = not state
         btn.Text = state and "ON" or "OFF"
         btn.BackgroundColor3 = state and Color3.fromRGB(60, 200, 60) or Color3.fromRGB(60, 60, 80)
-        label.Text = text .. (state and " ON" or " OFF")
         callback(state)
         updateStatusDot()
     end)
@@ -265,12 +287,52 @@ function createToggle(text, yPos, callback)
     return frame
 end
 
--- ===== СОЗДАНИЕ СЛАЙДЕРА =====
-function createSlider(text, yPos, minVal, maxVal, defaultVal, callback)
+-- РАСПОЛОЖЕНИЕ TOGGLES
+local toggleX = 5
+createWideToggle("HITBOX", toggleX, 5, function(s) hitboxEnabled = s end)
+toggleX = toggleX + 108
+createWideToggle("AIMBOT", toggleX, 5, function(s) aimbotEnabled = s end)
+toggleX = toggleX + 108
+createWideToggle("SPINBOT", toggleX, 5, function(s) spinbotEnabled = s end)
+toggleX = toggleX + 108
+createWideToggle("ESP", toggleX, 5, function(s) espEnabled = s end)
+toggleX = toggleX + 108
+createWideToggle("KILL AURA", toggleX, 5, function(s) killAuraEnabled = s end)
+
+toggleX = 5
+createWideToggle("AUTO KILL", toggleX, 55, function(s) autoKillEnabled = s end)
+toggleX = toggleX + 108
+createWideToggle("SPEED", toggleX, 55, function(s)
+    speedHackEnabled = s
+    local char = player.Character
+    if char and char:FindFirstChild("Humanoid") then
+        if s then
+            originalWalkSpeed = char.Humanoid.WalkSpeed
+            char.Humanoid.WalkSpeed = originalWalkSpeed * speedMultiplier
+        else
+            char.Humanoid.WalkSpeed = originalWalkSpeed
+        end
+    end
+end)
+toggleX = toggleX + 108
+createWideToggle("NOCLIP", toggleX, 55, function(s) noclipEnabled = s end)
+toggleX = toggleX + 108
+createWideToggle("FARM", toggleX, 55, function(s) autoFarmEnabled = s end)
+toggleX = toggleX + 108
+createWideToggle("TEAM CHECK", toggleX, 55, function(s) checkTeammates = s end)
+
+-- ===== НИЖНИЙ РЯД (СЛАЙДЕРЫ) =====
+local bottomRow = Instance.new("Frame")
+bottomRow.Parent = mainFrame
+bottomRow.Size = UDim2.new(1, -16, 0, 140)
+bottomRow.Position = UDim2.new(0, 8, 0, 165)
+bottomRow.BackgroundTransparency = 1
+
+local function createWideSlider(text, xPos, yPos, minVal, maxVal, defaultVal, callback)
     local frame = Instance.new("Frame")
-    frame.Parent = contentFrame
-    frame.Size = UDim2.new(0.95, 0, 0, 55)
-    frame.Position = UDim2.new(0.025, 0, 0, yPos)
+    frame.Parent = bottomRow
+    frame.Size = UDim2.new(0, 140, 0, 55)
+    frame.Position = UDim2.new(0, xPos, 0, yPos)
     frame.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
     frame.BackgroundTransparency = 0.15
     local fCorner = Instance.new("UICorner")
@@ -279,19 +341,19 @@ function createSlider(text, yPos, minVal, maxVal, defaultVal, callback)
     
     local label = Instance.new("TextLabel")
     label.Parent = frame
-    label.Size = UDim2.new(0.7, 0, 0.35, 0)
-    label.Position = UDim2.new(0.05, 0, 0.05, 0)
+    label.Size = UDim2.new(1, 0, 0.35, 0)
+    label.Position = UDim2.new(0, 0, 0, 0)
     label.BackgroundTransparency = 1
     label.Text = text .. ": " .. tostring(round(defaultVal))
     label.TextColor3 = Color3.fromRGB(220, 220, 220)
-    label.TextSize = 12
-    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.TextSize = 10
+    label.TextXAlignment = Enum.TextXAlignment.Center
     label.Font = Enum.Font.GothamBold
     
     local slider = Instance.new("Frame")
     slider.Parent = frame
     slider.Size = UDim2.new(0.85, 0, 0, 5)
-    slider.Position = UDim2.new(0.075, 0, 0.6, 0)
+    slider.Position = UDim2.new(0.075, 0, 0.45, 0)
     slider.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
     local sCorner = Instance.new("UICorner")
     sCorner.CornerRadius = UDim.new(1, 0)
@@ -307,13 +369,13 @@ function createSlider(text, yPos, minVal, maxVal, defaultVal, callback)
     
     local valueLabel = Instance.new("TextLabel")
     valueLabel.Parent = frame
-    valueLabel.Size = UDim2.new(0.15, 0, 0.35, 0)
-    valueLabel.Position = UDim2.new(0.8, 0, 0.05, 0)
+    valueLabel.Size = UDim2.new(1, 0, 0.25, 0)
+    valueLabel.Position = UDim2.new(0, 0, 0.75, 0)
     valueLabel.BackgroundTransparency = 1
     valueLabel.Text = tostring(round(defaultVal))
     valueLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    valueLabel.TextSize = 12
-    valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+    valueLabel.TextSize = 10
+    valueLabel.TextXAlignment = Enum.TextXAlignment.Center
     valueLabel.Font = Enum.Font.GothamBold
     
     local value = defaultVal
@@ -347,24 +409,43 @@ function createSlider(text, yPos, minVal, maxVal, defaultVal, callback)
         end
     end)
     
-    userInputService.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            updateSlider(input)
-        end
-    end)
-    
     return frame
 end
 
--- ===== СОЗДАНИЕ КНОПКИ =====
-function createButton(text, yPos, color, callback)
+local function round(num)
+    return math.floor(num * 100 + 0.5) / 100
+end
+
+-- РАСПОЛОЖЕНИЕ СЛАЙДЕРОВ
+local sliderX = 5
+createWideSlider("HITBOX SIZE", sliderX, 5, 1, 500, 5, function(v) hitboxSize = v end)
+sliderX = sliderX + 150
+createWideSlider("SPIN SPEED", sliderX, 5, 100, 999, 999, function(v) spinSpeed = v end)
+sliderX = sliderX + 150
+createWideSlider("AIM RANGE", sliderX, 5, 20, 150, 50, function(v) aimbotRange = v end)
+
+sliderX = 5
+createWideSlider("AIM FOV", sliderX, 65, 15, 180, 60, function(v) aimbotFOV = v end)
+sliderX = sliderX + 150
+createWideSlider("ESP RANGE", sliderX, 65, 20, 100, 50, function(v) espRange = v end)
+sliderX = sliderX + 150
+createWideSlider("KILL RANGE", sliderX, 65, 10, 80, 30, function(v) killAuraRange = v end)
+
+-- ===== КНОПКИ =====
+local btnRow = Instance.new("Frame")
+btnRow.Parent = mainFrame
+btnRow.Size = UDim2.new(1, -16, 0, 30)
+btnRow.Position = UDim2.new(0, 8, 0, 335)
+btnRow.BackgroundTransparency = 1
+
+local function createWideButton(text, xPos, color, callback)
     local btn = Instance.new("TextButton")
-    btn.Parent = contentFrame
-    btn.Size = UDim2.new(0.95, 0, 0, 38)
-    btn.Position = UDim2.new(0.025, 0, 0, yPos)
+    btn.Parent = btnRow
+    btn.Size = UDim2.new(0, 150, 0, 25)
+    btn.Position = UDim2.new(0, xPos, 0, 0)
     btn.Text = text
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 14
+    btn.TextSize = 12
     btn.Font = Enum.Font.GothamBold
     btn.BackgroundColor3 = color
     btn.BackgroundTransparency = 0.15
@@ -376,93 +457,11 @@ function createButton(text, yPos, color, callback)
     return btn
 end
 
--- ===== РАСПОЛОЖЕНИЕ =====
-local yPos = 5
-
-createToggle("HITBOX", yPos, function(state) hitboxEnabled = state end)
-yPos = yPos + 45
-
-createToggle("AIMBOT", yPos, function(state) aimbotEnabled = state end)
-yPos = yPos + 45
-
-createToggle("SPINBOT", yPos, function(state) spinbotEnabled = state end)
-yPos = yPos + 45
-
-createToggle("ESP", yPos, function(state) espEnabled = state end)
-yPos = yPos + 45
-
-createToggle("KILL AURA", yPos, function(state) killAuraEnabled = state end)
-yPos = yPos + 45
-
-createToggle("AUTO KILL", yPos, function(state) autoKillEnabled = state end)
-yPos = yPos + 45
-
-createToggle("SPEED HACK", yPos, function(state)
-    speedHackEnabled = state
-    local char = player.Character
-    if char and char:FindFirstChild("Humanoid") then
-        if state then
-            originalWalkSpeed = char.Humanoid.WalkSpeed
-            char.Humanoid.WalkSpeed = originalWalkSpeed * speedMultiplier
-        else
-            char.Humanoid.WalkSpeed = originalWalkSpeed
-        end
-    end
-end)
-yPos = yPos + 45
-
-createToggle("NOCLIP", yPos, function(state) noclipEnabled = state end)
-yPos = yPos + 45
-
-createToggle("AUTO FARM", yPos, function(state) autoFarmEnabled = state end)
-yPos = yPos + 45
-
-createToggle("TELEPORT", yPos, function(state) teleportEnabled = state end)
-yPos = yPos + 45
-
-createToggle("TEAM CHECK", yPos, function(state) checkTeammates = state end)
-yPos = yPos + 45
-
-createToggle("ANTI BAN", yPos, function(state) antiBanEnabled = state end)
-yPos = yPos + 45
-
--- СЛАЙДЕРЫ
-createSlider("HITBOX SIZE", yPos, 1, 500, 5, function(val) hitboxSize = val end)
-yPos = yPos + 65
-
-createSlider("SPIN SPEED", yPos, 100, 999, 999, function(val) spinSpeed = val end)
-yPos = yPos + 65
-
-createSlider("AIM RANGE", yPos, 20, 150, 50, function(val) aimbotRange = val end)
-yPos = yPos + 65
-
-createSlider("AIM FOV", yPos, 15, 180, 60, function(val) aimbotFOV = val end)
-yPos = yPos + 65
-
-createSlider("ESP RANGE", yPos, 20, 100, 50, function(val) espRange = val end)
-yPos = yPos + 65
-
-createSlider("KILL AURA RANGE", yPos, 10, 80, 30, function(val) killAuraRange = val end)
-yPos = yPos + 65
-
-createSlider("SPEED MULTIPLIER", yPos, 1.0, 5.0, 2.0, function(val)
-    speedMultiplier = val
-    if speedHackEnabled then
-        local char = player.Character
-        if char and char:FindFirstChild("Humanoid") then
-            char.Humanoid.WalkSpeed = originalWalkSpeed * speedMultiplier
-        end
-    end
-end)
-yPos = yPos + 65
-
--- КНОПКИ
-createButton("TELEPORT TO PLAYER", yPos, Color3.fromRGB(0, 150, 255), function()
+createWideButton("TELEPORT", 5, Color3.fromRGB(0, 150, 255), function()
     teleportToPlayer()
 end)
-yPos = yPos + 45
 
-createButton("RESET ALL", yPos, Color3.fromRGB(255, 165, 0), function()
+createWideButton("RESET ALL", 165, Color3.fromRGB(255, 165, 0), function()
     hitboxEnabled = false
     aimbotEnabled = false
     spinbotEnabled = false
@@ -491,12 +490,34 @@ createButton("RESET ALL", yPos, Color3.fromRGB(255, 165, 0), function()
     print("[RESET] Все функции сброшены")
 end)
 
+createWideButton("ANTI BAN", 325, Color3.fromRGB(255, 50, 50), function()
+    antiBanEnabled = not antiBanEnabled
+    print("[ANTI BAN] " .. (antiBanEnabled and "ВКЛЮЧЁН" or "ВЫКЛЮЧЁН"))
+end)
+
 -- ===== ОТКРЫТИЕ МЕНЮ =====
 iconButton.MouseButton1Click:Connect(function()
     mainFrame.Visible = not mainFrame.Visible
 end)
 
--- ===== HITBOX (ПРОЗРАЧНЫЙ) =====
+-- ===== ФУНКЦИИ =====
+local function updateStatusDot()
+    if hitboxEnabled or aimbotEnabled or spinbotEnabled or espEnabled or speedHackEnabled or noclipEnabled or autoFarmEnabled or teleportEnabled or killAuraEnabled or autoKillEnabled then
+        statusIndicator.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    else
+        statusIndicator.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    end
+end
+
+local function isTeammateCheck(targetPlayer)
+    if player.Team and targetPlayer.Team == player.Team then return true end
+    if player:FindFirstChild("Team") and targetPlayer:FindFirstChild("Team") then
+        if player.Team.Name == targetPlayer.Team.Name then return true end
+    end
+    return false
+end
+
+-- ===== HITBOX =====
 local hitboxes = {}
 
 function clearHitboxes()
@@ -544,15 +565,17 @@ function updateHitboxes()
     for _, plr in pairs(game:GetService("Players"):GetPlayers()) do
         if plr ~= player and plr.Character then
             local isTeammate = checkTeammates and isTeammateCheck(plr)
-            local color = isTeammate and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+            local color = isTeammate and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(255, 0, 0)
             createHitbox(plr.Character, color)
         end
     end
 end
 
--- ===== ESP С ИМЕНЕМ И ДИСТАНЦИЕЙ =====
+-- ===== ESP (РАДУЖНАЯ ОБВОДКА + ИМЯ + МЕТРЫ + КВАДРАТ + ЛИНИЯ) =====
 local espObjects = {}
 local espLabels = {}
+local espLines = {}
+local espRainbowOutlines = {}
 
 function clearESP()
     for _, obj in pairs(espObjects) do
@@ -563,6 +586,14 @@ function clearESP()
         pcall(function() obj:Destroy() end)
     end
     espLabels = {}
+    for _, obj in pairs(espLines) do
+        pcall(function() obj:Destroy() end)
+    end
+    espLines = {}
+    for _, obj in pairs(espRainbowOutlines) do
+        pcall(function() obj:Destroy() end)
+    end
+    espRainbowOutlines = {}
 end
 
 function updateESP()
@@ -582,6 +613,7 @@ function updateESP()
                     local isTeammate = checkTeammates and isTeammateCheck(plr)
                     local color = isTeammate and teammateEspColor or espColor
                     
+                    -- ПОДСВЕТКА (Highlight)
                     local highlight = Instance.new("Highlight")
                     highlight.Adornee = plr.Character
                     highlight.FillColor = color
@@ -591,7 +623,7 @@ function updateESP()
                     highlight.Parent = plr.Character
                     table.insert(espObjects, highlight)
                     
-                    -- Квадрат вокруг игрока
+                    -- КВАДРАТ (BoxHandleAdornment)
                     local box = Instance.new("BoxHandleAdornment")
                     box.Parent = plr.Character
                     box.Size = Vector3.new(4, 5, 2)
@@ -599,10 +631,10 @@ function updateESP()
                     box.ZIndex = 0
                     box.AlwaysOnTop = true
                     box.Color3 = color
-                    box.Transparency = 0.6
+                    box.Transparency = 0.5
                     table.insert(espObjects, box)
                     
-                    -- Текст с именем и дистанцией
+                    -- ИМЯ + МЕТРЫ (BillboardGui)
                     local billboard = Instance.new("BillboardGui")
                     billboard.Parent = targetHrp
                     billboard.Size = UDim2.new(0, 200, 0, 50)
@@ -621,13 +653,55 @@ function updateESP()
                     label.TextStrokeTransparency = 0.3
                     label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
                     table.insert(espLabels, billboard)
+                    
+                    -- ЛИНИЯ ОТ ИГРОКА К ЦЕЛИ
+                    if showLines then
+                        local linePart = Instance.new("Part")
+                        linePart.Parent = workspace
+                        linePart.Size = Vector3.new(0.1, 0.1, (hrp.Position - targetHrp.Position).Magnitude)
+                        linePart.CFrame = CFrame.lookAt(hrp.Position, targetHrp.Position) * CFrame.new(0, 0, -linePart.Size.Z / 2)
+                        linePart.Anchored = true
+                        linePart.CanCollide = false
+                        linePart.Transparency = 0.4
+                        linePart.BrickColor = BrickColor.new(color)
+                        table.insert(espLines, linePart)
+                    end
+                    
+                    -- РАДУЖНАЯ ОБВОДКА ВОКРУГ ИГРОКА (UIStroke)
+                    local rainbowStroke = Instance.new("UIStroke")
+                    rainbowStroke.Parent = plr.Character
+                    rainbowStroke.Thickness = 2
+                    rainbowStroke.Transparency = 0.1
+                    rainbowStroke.Color = Color3.fromRGB(255, 0, 0)
+                    rainbowStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                    table.insert(espRainbowOutlines, rainbowStroke)
+                    
+                    -- АНИМАЦИЯ РАДУЖНОЙ ОБВОДКИ ДЛЯ ЭТОГО ИГРОКА
+                    spawn(function()
+                        local colors = {
+                            Color3.fromRGB(255, 0, 0),
+                            Color3.fromRGB(255, 165, 0),
+                            Color3.fromRGB(255, 255, 0),
+                            Color3.fromRGB(0, 255, 0),
+                            Color3.fromRGB(0, 0, 255),
+                            Color3.fromRGB(75, 0, 130),
+                            Color3.fromRGB(238, 130, 238)
+                        }
+                        local i = 1
+                        while rainbowStroke and rainbowStroke.Parent do
+                            rainbowStroke.Color = colors[i]
+                            i = i + 1
+                            if i > #colors then i = 1 end
+                            task.wait(0.15)
+                        end
+                    end)
                 end
             end
         end
     end
 end
 
--- ===== AIMBOT + FOV КРУГ =====
+-- ===== AIMBOT + FOV =====
 local fovCircle = nil
 
 function createFOVCircle()
@@ -793,7 +867,6 @@ runService.RenderStepped:Connect(function()
     if hitboxEnabled then updateHitboxes() else clearHitboxes() end
     if espEnabled then updateESP() else clearESP() end
     
-    -- FOV круг
     if aimbotEnabled then
         if not fovCircle then createFOVCircle() end
         if fovCircle then
@@ -807,7 +880,6 @@ runService.RenderStepped:Connect(function()
         end
     end
     
-    -- Aimbot
     if aimbotEnabled then
         local target = getClosestTarget()
         if target then
@@ -825,21 +897,13 @@ runService.RenderStepped:Connect(function()
         end
     end
     
-    -- SpinBot (быстрый, даже при ходьбе)
     if spinbotEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local hrp = player.Character.HumanoidRootPart
         hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(spinSpeed / 30), 0)
     end
     
-    -- Kill Aura
-    if killAuraEnabled then
-        killAura()
-    end
-    
-    -- Auto Kill
-    if autoKillEnabled then
-        autoKill()
-    end
+    if killAuraEnabled then killAura() end
+    if autoKillEnabled then autoKill() end
 end)
 
 runService.Stepped:Connect(function()
@@ -849,10 +913,7 @@ runService.Stepped:Connect(function()
         player.Character.HumanoidRootPart.CanCollide = true
     end
     
-    if autoFarmEnabled then
-        autoFarm()
-    end
-    
+    if autoFarmEnabled then autoFarm() end
     if teleportEnabled then
         teleportToPlayer()
         task.wait(3)
@@ -894,7 +955,7 @@ player.CharacterRemoving:Connect(function()
 end)
 
 -- ===== ПРИВЕТСТВИЕ =====
-print("HITBOX + AIMBOT + SPINBOT + KILLAURA PRO LOADED")
+print("HITBOX + AIMBOT + SPINBOT + KILLAURA PRO LOADED (WIDE MENU)")
 print("F1 - MENU | F2 - HITBOX | F3 - AIMBOT | F4 - SPINBOT")
 print("F5 - ESP | F6 - SPEED | F7 - NOCLIP | F8 - KILLAURA")
 updateStatusDot()
