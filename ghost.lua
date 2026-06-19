@@ -34,21 +34,22 @@ local settings = {
 
 local originalSpeed = 16
 
--- ===== GUI =====
+-- ===== ГЛАВНОЕ МЕНЮ =====
 local gui = Instance.new("ScreenGui")
 gui.Name = "GhostPro"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- ИКОНКА
+-- ===== ИКОНКА (ОБЯЗАТЕЛЬНО ВИДИМАЯ) =====
 local icon = Instance.new("ImageButton")
 icon.Parent = gui
 icon.Size = UDim2.new(0, 55, 0, 55)
-icon.Position = UDim2.new(0.02, 0, 0.85, 0)
+icon.Position = UDim2.new(0.02, 0, 0.85, 0) -- левый нижний угол
 icon.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 icon.BackgroundTransparency = 0.1
 icon.BorderSizePixel = 2
 icon.BorderColor3 = Color3.fromRGB(255, 255, 255)
+icon.Visible = true -- <--- ЭТО ВАЖНО
 
 local iconCorner = Instance.new("UICorner")
 iconCorner.CornerRadius = UDim.new(1, 0)
@@ -63,7 +64,7 @@ labelH.TextColor3 = Color3.fromRGB(255, 255, 255)
 labelH.TextScaled = true
 labelH.Font = Enum.Font.GothamBold
 
--- СТАТУС
+-- СТАТУС (точка)
 local status = Instance.new("Frame")
 status.Parent = icon
 status.Size = UDim2.new(0, 10, 0, 10)
@@ -92,7 +93,7 @@ userInputService.TouchMoved:Connect(function(i)
     end
 end)
 
--- МЕНЮ
+-- ===== МЕНЮ =====
 local menu = Instance.new("Frame")
 menu.Parent = gui
 menu.Size = UDim2.new(0, 420, 0, 400)
@@ -164,7 +165,7 @@ userInputService.TouchMoved:Connect(function(i)
     end
 end)
 
--- ОТКРЫТИЕ
+-- ОТКРЫТИЕ МЕНЮ ПО КЛИКУ НА ИКОНКУ
 icon.MouseButton1Click:Connect(function()
     menu.Visible = not menu.Visible
 end)
@@ -221,7 +222,12 @@ local function addToggle(text, callback)
         b.Text = state and "ON" or "OFF"
         b.BackgroundColor3 = state and Color3.fromRGB(60, 200, 60) or Color3.fromRGB(60, 60, 80)
         callback(state)
-        status.BackgroundColor3 = state and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+        -- обновляем статус
+        local anyOn = false
+        for _, v in pairs(settings) do
+            if type(v) == "boolean" and v then anyOn = true end
+        end
+        status.BackgroundColor3 = anyOn and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
     end)
     y = y + 42
     return f
@@ -425,6 +431,8 @@ addButton("RESET ALL", function()
         char.Humanoid.WalkSpeed = 16
     end
     status.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    -- обновить все кнопки в меню (пришлось бы пересоздавать, поэтому просто выводим сообщение)
+    print("[RESET] Все функции сброшены. Перезапустите скрипт для обновления кнопок.")
 end)
 
 -- ===== ФУНКЦИИ =====
